@@ -4,7 +4,11 @@ from ninja import NinjaAPI
 from apps.Accounts.api.views import router as accounts_router
 from apps.Accounts.api.views import auth_router
 
-from apps.Users.api.views import router_student, router_coordinator, router_director
+from apps.Users.api.views import (
+    router_student,
+    router_coordinator,
+    router_director,
+)
 
 api = NinjaAPI(title='EmpatIA', docs_url='/docs/')
 
