@@ -125,7 +125,7 @@ class UpdateStudentUseCase:
 
         query = self.query_service.get_by_id(student.id)
         if not query:
-            raise BaseDomainException("user account student not found")
+            raise BaseDomainException('user account student not found')
 
         return query
 
@@ -282,7 +282,10 @@ class RegisterDirectorUseCase:
 
         self.user_repo.save(user)
 
-        director = DirectorEntity(user=user.id)
+        director = DirectorEntity(
+            user=user.id, 
+            school=dto.school
+        )
         self.director_repo.save(director)
 
         query_user = self.query_service.get_by_id(director.id)
@@ -323,7 +326,7 @@ class DeactiveDirectorUseCase:
         if not director.user:
             raise BaseDomainException('director has no user atribute')
 
-        user = self.user_repo.find_by_id(id)
+        user = self.user_repo.find_by_id(director.user)
         if not user:
             raise UserNotFoundException('user not found')
 

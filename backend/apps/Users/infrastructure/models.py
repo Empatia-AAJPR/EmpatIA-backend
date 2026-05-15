@@ -32,5 +32,9 @@ class Director(models.Model):
     id = models.UUIDField(primary_key=True, editable=False, default=uuid4)
     user = models.OneToOneField('Accounts.User', on_delete=models.CASCADE)
 
+    school = models.OneToOneField(
+        'Schools.School', on_delete=models.CASCADE, null=True
+    )
+
     class Meta:
         db_table = 'director'

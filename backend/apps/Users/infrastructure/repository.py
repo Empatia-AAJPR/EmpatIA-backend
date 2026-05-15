@@ -74,7 +74,8 @@ class CoordinatorRepository(ICoordinatorRepository):
 class DirectorRepository(IDirectorRepository):
     def save(self, director: DirectorEntity) -> DirectorEntity:
         Director.objects.update_or_create(
-            id=director.id, defaults={'user_id': director.user}
+            id=director.id,
+            defaults={'user_id': director.user, 'school_id': director.school},
         )
 
         return director
@@ -87,4 +88,8 @@ class DirectorRepository(IDirectorRepository):
             return None
 
     def _to_entity(self, model: Director) -> DirectorEntity:
-        return DirectorEntity(id=model.id, user=model.user.id)
+        return DirectorEntity(
+            id=model.id,
+            user=model.user.id,
+            school=model.school.id if model.school else None,
+        )

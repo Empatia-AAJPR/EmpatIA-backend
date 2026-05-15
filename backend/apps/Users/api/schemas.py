@@ -127,14 +127,14 @@ class DirectorIn(Schema):
     name: str
     email: EmailStr
     password: str
-    date_birth: date
+    school: UUID
 
     def to_dto(self) -> DirectorInDTO:
         return DirectorInDTO(
             name=self.name,
             email=self.email,
             password=self.password,
-            date_birth=self.date_birth,
+            school=self.school,
         )
 
 
@@ -144,8 +144,8 @@ class DirectorOut(Schema):
     name: str
     email: EmailStr
     password: str
-    date_birth: date
     active: bool
+    school: UUID
 
     @staticmethod
     def from_domain(dto: DirectorOutDTO):
@@ -155,6 +155,6 @@ class DirectorOut(Schema):
             name=dto.name,
             email=dto.email,
             password=dto.password,
-            date_birth=dto.date_birth,
-            active=dto.active
+            active=dto.active,
+            school=dto.school,
         )

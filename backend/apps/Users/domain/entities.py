@@ -43,3 +43,4 @@ class CoordinatorEntity:
 class DirectorEntity:
     id: UUID = field(default_factory=uuid4)
     user: UUID | None = field(default=None)
+    school: UUID | None = field(default=None)
