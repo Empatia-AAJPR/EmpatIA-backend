@@ -282,10 +282,7 @@ class RegisterDirectorUseCase:
 
         self.user_repo.save(user)
 
-        director = DirectorEntity(
-            user=user.id, 
-            school=dto.school
-        )
+        director = DirectorEntity(user=user.id, school=dto.school)
         self.director_repo.save(director)
 
         query_user = self.query_service.get_by_id(director.id)

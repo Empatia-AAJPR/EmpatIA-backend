@@ -291,27 +291,6 @@ Apps presentes: `Accounts`, `Schools`, `Users`, `Classroom`
 
 ---
 
-### UC06 — Monitoramento Emocional em Tempo Real
-**Escopo:** Visão Computacional (API externa ao backend)  
-**Ator Primário:** Sistema (processo automatizado)  
-**Pré-condição:** Câmeras ativas e estudantes cadastrados com `vector_facial`
-
-**Cenário principal de sucesso:**
-1. O sistema captura imagens do feed das câmeras (DVR)
-2. YOLO detecta e rastreia pessoas nos ambientes
-3. InsightFace identifica os estudantes por reconhecimento facial
-4. DBSCAN analisa expressões emocionais e padrões de isolamento
-5. Os dados processados são transmitidos via Redis ao backend Django
-6. O backend persiste os registros analíticos e dispara alertas quando necessário
-
-**Garantia de sucesso:** Painel web atualizado com histórico emocional e alertas ativos
-
-**Extensões:**
-- `3a` — Estudante não reconhecido → evento registrado como "não identificado", sem alerta
-- `6a` — Padrão crítico detectado → notificação simultânea no painel web e via WhatsApp (WAHA)
-
----
-
 ## ✨ Funcionalidades Principais
 
 - **Cadastro de turmas e alunos** com vinculação ao reconhecimento facial
