@@ -2,7 +2,10 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from uuid import UUID, uuid4
 
-from apps.Classroom.domain.exceptions import ConflictFieldsExceptions, FieldISRequiredException
+from apps.Classroom.domain.exceptions import (
+    ConflictFieldsExceptions,
+    FieldISRequiredException,
+)
 
 
 @dataclass
@@ -21,6 +24,6 @@ class ClassroomEntity:
 
     def change_course(self, new_course):
         if not new_course:
-            raise FieldISRequiredException("new course is required")
-        
+            raise FieldISRequiredException('new course is required')
+
         self.course = new_course

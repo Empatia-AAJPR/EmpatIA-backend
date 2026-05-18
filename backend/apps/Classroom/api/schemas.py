@@ -3,7 +3,11 @@ from uuid import UUID
 
 from ninja import Schema
 
-from apps.Classroom.application.dto import ClassroomInDTO, ClassroomOutDTO, UpdateClassroomInDTO
+from apps.Classroom.application.dto import (
+    ClassroomInDTO,
+    ClassroomOutDTO,
+    UpdateClassroomInDTO,
+)
 
 
 class ClassroomIn(Schema):
@@ -11,11 +15,8 @@ class ClassroomIn(Schema):
     school: UUID
 
     def to_dto(self) -> ClassroomInDTO:
-        return ClassroomInDTO(
-            course=self.course,
-            school=self.school
-        )
-    
+        return ClassroomInDTO(course=self.course, school=self.school)
+
 
 class ClassroomOut(Schema):
     id: UUID
@@ -29,15 +30,12 @@ class ClassroomOut(Schema):
             id=dto.id,
             course=dto.course,
             school=dto.school,
-            deleted_at=dto.deleted_at
+            deleted_at=dto.deleted_at,
         )
-    
+
 
 class UpdateClassroomIn(Schema):
     course: str
 
     def to_dto(self) -> UpdateClassroomInDTO:
-        return UpdateClassroomInDTO(
-            course=self.course
-        )
-    
+        return UpdateClassroomInDTO(course=self.course)

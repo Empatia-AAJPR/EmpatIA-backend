@@ -14,40 +14,40 @@ class ClassroomRepository(IClassroomRepository):
                 'course': classroom.course,
                 'school_id': classroom.school,
                 'created_at': classroom.created_at,
-                'deleted_at': classroom.deleted_at
-            }
+                'deleted_at': classroom.deleted_at,
+            },
         )
 
         return classroom
-    
+
     def find_by_id(self, id: UUID) -> ClassroomEntity | None:
         try:
             return self._to_model(Classroom.objects.get(id=id))
-        
+
         except Classroom.DoesNotExist:
             return None
-    
+
     def find_by_course(self, course: str) -> ClassroomEntity | None:
         try:
             return self._to_model(Classroom.objects.get(course=course))
-        
+
         except Classroom.DoesNotExist:
             return None
-        
+
     def exists_course(self, course: str) -> bool:
         return Classroom.objects.filter(course=course).exists()
-    
+
     def list_classrooms_by_school(self, school: UUID) -> List[ClassroomEntity]:
         return [
             self._to_model(model)
             for model in Classroom.objects.filter(school=school)
         ]
-    
+
     def _to_model(self, model: Classroom) -> ClassroomEntity:
         return ClassroomEntity(
             id=model.id,
             course=model.course,
             school=model.school.id,
             created_at=model.created_at,
-            deleted_at=model.deleted_at
+            deleted_at=model.deleted_at,
         )

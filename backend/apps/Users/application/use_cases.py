@@ -45,7 +45,7 @@ class RegisterStudentUseCase:
         student_repo: IStudentRepository,
         query_service: IStudentQueryService,
         file_adapter: IImageFileAdapter,
-        class_repo: IClassroomRepository
+        class_repo: IClassroomRepository,
     ) -> None:
         self.user_repo = user_repo
         self.hash_service = hash_service
@@ -57,13 +57,13 @@ class RegisterStudentUseCase:
     def execute(self, dto: StudentInDTO):
         if self.user_repo.exists_email(dto.email):
             raise ConflictFieldException('email already register')
-        
+
         classroom = self.class_repo.find_by_id(dto.classroom)
         if not classroom:
-            raise BaseDomainException("classroom not found")
-        
-        if not classroom.deleted_at:
-            raise BaseDomainException("classroom not active")
+            raise BaseDomainException('classroom not found')
+
+        if classroom.deleted_at:
+            raise BaseDomainException('classroom not active')
 
         password_hash = self.hash_service.hash_password(dto.password)
 
@@ -182,7 +182,7 @@ class RegisterCoordinatorUseCase:
         coordinator_repo: ICoordinatorRepository,
         hash_service: IHashService,
         query_service: ICoordinatorQueryService,
-        school_repo: ISchoolRepository
+        school_repo: ISchoolRepository,
     ) -> None:
         self.user_repo = user_repo
         self.coordinator_repo = coordinator_repo
@@ -193,12 +193,12 @@ class RegisterCoordinatorUseCase:
     def execute(self, dto: CoordinatorInDTO):
         if self.user_repo.exists_email(dto.email):
             raise ConflictEntityException('email already exists')
-        
+
         school = self.school_repo.find_by_id(dto.school)
         if not school:
             raise BaseDomainException('school not found')
 
-        if not school.deleted_at:
+        if school.deleted_at:
             raise BaseDomainException('school not active')
 
         password_hash = self.hash_service.hash_password(dto.password)
@@ -211,9 +211,7 @@ class RegisterCoordinatorUseCase:
         )
         self.user_repo.save(user)
 
-        coordinator = CoordinatorEntity(
-            user=user.id, school=dto.school
-        )
+        coordinator = CoordinatorEntity(user=user.id, school=dto.school)
         self.coordinator_repo.save(coordinator)
 
         query = self.query_service.get_by_id(coordinator.id)
@@ -279,7 +277,7 @@ class RegisterDirectorUseCase:
         director_repo: IDirectorRepository,
         hash_service: IHashService,
         query_service: IDirectorQueryService,
-        school_repo: ISchoolRepository
+        school_repo: ISchoolRepository,
     ) -> None:
         self.user_repo = user_repo
         self.director_repo = director_repo
@@ -290,13 +288,13 @@ class RegisterDirectorUseCase:
     def execute(self, dto: DirectorInDTO):
         if self.user_repo.exists_email(dto.email):
             raise ConflictFieldException('email already register')
-        
+
         school = self.school_repo.find_by_id(dto.school)
 
         if not school:
             raise BaseDomainException('school not found')
-        
-        if not school.deleted_at:
+
+        if school.deleted_at:
             raise BaseDomainException('school not active')
 
         password_hash = self.hash_service.hash_password(dto.password)

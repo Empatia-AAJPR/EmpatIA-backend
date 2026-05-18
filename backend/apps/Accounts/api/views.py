@@ -16,7 +16,7 @@ from apps.Accounts.api.schemas import (
     UserUpdateIn,
 )
 
-router = Router()
+router = Router(auth=JWTAuth())
 
 auth_router = Router()
 
@@ -26,6 +26,9 @@ container = AccountsContainer()
 @router.post('/', response={201: UserOut})
 @transaction.atomic
 def register_user(request, data: UserIn):
+
+    is_authorized(request)
+
     dto = data.to_dto()
 
     use_case = container.register_user_use_case()
@@ -37,6 +40,9 @@ def register_user(request, data: UserIn):
 
 @router.get('/{id}', response={200: UserOut})
 def response_user_by_id(request, id: UUID):
+
+    is_authorized(request)
+
     use_case = container.response_user_by_id_use_case()
 
     user = use_case.execute(id)
@@ -46,6 +52,9 @@ def response_user_by_id(request, id: UUID):
 
 @router.get('/', response={200: UserOut})
 def response_user_by_email(request, email: EmailStr):
+
+    is_authorized(request)
+
     use_case = container.response_user_by_email_use_case()
 
     user = use_case.execute(email)
@@ -56,6 +65,9 @@ def response_user_by_email(request, email: EmailStr):
 @router.patch('/{id}', response={200: UserOut})
 @transaction.atomic
 def update_user(request, id: UUID, data: UserUpdateIn):
+
+    is_authorized(request)
+
     dto = data.to_dto()
 
     use_case = container.update_user_use_case()

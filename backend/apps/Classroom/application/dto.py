@@ -22,9 +22,9 @@ class ClassroomOutDTO(BaseModel):
             id=model.id,
             course=model.course,
             school=model.school,
-            deleted_at=model.deleted_at
+            deleted_at=model.deleted_at,
         )
-    
+
 
 class UpdateClassroomInDTO(BaseModel):
     course: Optional[str] = None
