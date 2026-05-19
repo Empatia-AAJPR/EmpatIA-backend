@@ -11,6 +11,7 @@ dependencies = [
     "django>=6.0.5",
     "django-ninja>=1.6.2",
     "dotenv>=0.9.9",
+    "gunicorn>=26.0.0",
     "passlib>=1.7.4",
     "pgvector>=0.4.2",
     "pillow>=12.2.0",
