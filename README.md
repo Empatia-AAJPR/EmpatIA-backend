@@ -127,7 +127,7 @@ Apps presentes: `Accounts`, `Schools`, `Users`, `Classroom`
 | `id` | UUID | PK |
 | `name` | string | — |
 | `email` | string | unique |
-| `password` | string | hash |
+| `password` | string | hash (max 12) |
 | `rule` | enum | perfil do usuário |
 | `active` | bool | — |
 | `created_at` | datetime | — |
@@ -141,7 +141,7 @@ Apps presentes: `Accounts`, `Schools`, `Users`, `Classroom`
 |---|---|---|
 | `id` | UUID | PK |
 | `hash_token` | string | — |
-| `user` | FK → User | — |
+| `user` | FK → Accounts.User | nullable |
 | `expire_at` | datetime | — |
 | `created_at` | datetime | — |
 | `revoked` | bool | — |
@@ -153,18 +153,18 @@ Apps presentes: `Accounts`, `Schools`, `Users`, `Classroom`
 | `id` | UUID | PK |
 | `name` | string | — |
 | `cnpj` | string | validado via value object |
-| `logo` | file | upload |
+| `logo` | file | upload, opcional |
 | `gre` | string | Gerência Regional de Educação |
 | `created_at` | datetime | — |
 | `deleted_at` | datetime | soft delete |
 
-### `Schools.NucleosGroup`
+### `Classroom.Classroom`
 
 | Campo | Tipo | Observação |
 |---|---|---|
 | `id` | UUID | PK |
-| `name` | string | — |
-| `school` | FK → School | — |
+| `course` | string | — |
+| `school` | FK → Schools.School | — |
 | `created_at` | datetime | — |
 | `deleted_at` | datetime | soft delete |
 
@@ -174,7 +174,7 @@ Apps presentes: `Accounts`, `Schools`, `Users`, `Classroom`
 |---|---|---|
 | `id` | UUID | PK |
 | `user` | OneToOne → Accounts.User | — |
-| `classroom` | FK → Classroom | — |
+| `classroom` | FK → Classroom.Classroom | — |
 | `date_birth` | date | — |
 | `photo` | file | — |
 | `vector_facial` | JSON | embeddings gerados pelo InsightFace |
@@ -185,7 +185,7 @@ Apps presentes: `Accounts`, `Schools`, `Users`, `Classroom`
 |---|---|---|
 | `id` | UUID | PK |
 | `user` | OneToOne → Accounts.User | — |
-| `school` | FK → NucleosGroup | — |
+| `school` | FK → Schools.School | — |
 
 ### `Users.Director`
 
@@ -193,7 +193,7 @@ Apps presentes: `Accounts`, `Schools`, `Users`, `Classroom`
 |---|---|---|
 | `id` | UUID | PK |
 | `user` | OneToOne → Accounts.User | — |
-| `school` | OneToOne → Schools.School | — |
+| `school` | OneToOne → Schools.School | nullable |
 
 ---
 
@@ -266,7 +266,7 @@ Apps presentes: `Accounts`, `Schools`, `Users`, `Classroom`
 2. O sistema valida o CNPJ via `value_objects`
 3. O sistema persiste `Schools.School` e retorna `201` com `SchoolOut`
 
-**Garantia de sucesso:** Escola cadastrada e disponível para associar núcleos e diretores
+**Garantia de sucesso:** Escola cadastrada e disponível para associar diretores e coordenadores
 
 **Extensões:**
 - `2a` — CNPJ inválido → `400 Bad Request`
@@ -274,20 +274,395 @@ Apps presentes: `Accounts`, `Schools`, `Users`, `Classroom`
 
 ---
 
-### UC05 — Cadastro do Núcleo Gestor
-**Escopo:** Schools.NucleosGroup  
-**Ator Primário:** Diretor  
+### UC05 — Consulta do Usuário por ID
+**Escopo:** Accounts
+**Ator Primário:** Usuário autenticado
+**Pré-condição:** Conta do usuário existe e está ativa
+
+**Cenário principal de sucesso:**
+1. O sistema busca `Accounts.User` por ID
+2. O sistema valida que o usuário existe
+3. O sistema retorna `UserOut` com os dados do usuário
+
+**Garantia de sucesso:** Dados do usuário retornados para exibição de perfil
+
+**Extensões:**
+- `1a` — Usuário não encontrado → `404 Not Found`
+
+---
+
+### UC06 — Consulta do Usuário por E-mail
+**Escopo:** Accounts
+**Ator Primário:** Usuário autenticado / Administrador
+**Pré-condição:** E-mail informado corresponde a uma conta cadastrada
+
+**Cenário principal de sucesso:**
+1. O sistema busca `Accounts.User` por e-mail
+2. O sistema valida que o usuário existe
+3. O sistema retorna `UserOut` com os dados do usuário
+
+**Garantia de sucesso:** Usuário localizado por e-mail para verificação ou recuperação
+
+**Extensões:**
+- `1a` — Usuário não encontrado → `404 Not Found`
+
+---
+
+### UC07 — Listagem de Usuários por Regra
+**Escopo:** Accounts
+**Ator Primário:** Administrador
+**Pré-condição:** Regra válida (`STUDENT`, `COORDINATOR`, `DIRECTOR`, etc.)
+
+**Cenário principal de sucesso:**
+1. O sistema consulta `Accounts.User` pela regra definida
+2. O sistema retorna a lista de usuários correspondentes
+
+**Garantia de sucesso:** Lista de usuários filtrada por perfil retornada
+
+**Extensões:**
+- `1a` — Nenhum usuário encontrado → lista vazia retornada
+
+---
+
+### UC08 — Atualização do Usuário
+**Escopo:** Accounts
+**Ator Primário:** Usuário ou Administrador
+**Pré-condição:** Conta ativa existente no sistema
+
+**Cenário principal de sucesso:**
+1. O sistema busca `Accounts.User` por ID
+2. O sistema aplica alterações válidas nos campos informados
+3. O sistema salva a conta atualizada e retorna `UserOut`
+
+**Garantia de sucesso:** Dados do usuário alterados e persistidos
+
+**Extensões:**
+- `1a` — Usuário não encontrado → `404 Not Found`
+
+---
+
+### UC09 — Desativação do Usuário
+**Escopo:** Accounts
+**Ator Primário:** Administrador
+**Pré-condição:** Conta existente no sistema
+
+**Cenário principal de sucesso:**
+1. O sistema busca `Accounts.User` por ID
+2. O sistema marca a conta como inativa
+3. O sistema salva a alteração e retorna `UserOut`
+
+**Garantia de sucesso:** Usuário desativado e não pode mais autenticar
+
+**Extensões:**
+- `1a` — Usuário não encontrado → `404 Not Found`
+
+---
+
+### UC10 — Consulta da Escola por ID
+**Escopo:** Schools
+**Ator Primário:** Diretor / Administrador
+**Pré-condição:** Escola cadastrada no sistema
+
+**Cenário principal de sucesso:**
+1. O sistema busca `Schools.School` por ID
+2. O sistema valida que a escola existe
+3. O sistema retorna `SchoolOut` com os dados da escola
+
+**Garantia de sucesso:** Dados da escola retornados corretamente
+
+**Extensões:**
+- `1a` — Escola não encontrada → `404 Not Found`
+
+---
+
+### UC11 — Consulta da Escola por CNPJ
+**Escopo:** Schools
+**Ator Primário:** Diretor / Administrador
+**Pré-condição:** CNPJ válido informado
+
+**Cenário principal de sucesso:**
+1. O sistema busca `Schools.School` por CNPJ
+2. O sistema valida que a escola existe
+3. O sistema retorna `SchoolOut` com os dados da escola
+
+**Garantia de sucesso:** Escola localizada por CNPJ
+
+**Extensões:**
+- `1a` — Escola não encontrada → `404 Not Found`
+
+---
+
+### UC12 — Atualização da Escola
+**Escopo:** Schools
+**Ator Primário:** Diretor / Administrador
 **Pré-condição:** Escola existente no sistema
 
 **Cenário principal de sucesso:**
-1. O sistema recebe nome do núcleo e ID da escola
-2. O sistema valida a existência da escola
-3. O sistema persiste `Schools.NucleosGroup` e retorna `201`
+1. O sistema busca `Schools.School` por ID
+2. O sistema aplica alterações válidas nos campos informados
+3. O sistema salva a escola atualizada e retorna `SchoolOut`
 
-**Garantia de sucesso:** Núcleo gestor criado e vinculado à escola
+**Garantia de sucesso:** Dados da escola atualizados e persistidos
 
 **Extensões:**
-- `2a` — Escola não encontrada → `404 Not Found`
+- `1a` — Escola não encontrada → `404 Not Found`
+
+---
+
+### UC13 — Desativação da Escola
+**Escopo:** Schools
+**Ator Primário:** Diretor / Administrador
+**Pré-condição:** Escola existente no sistema
+
+**Cenário principal de sucesso:**
+1. O sistema busca `Schools.School` por ID
+2. O sistema marca a escola como inativa
+3. O sistema salva a alteração e retorna `SchoolOut`
+
+**Garantia de sucesso:** Escola desativada e não participa de novos cadastros
+
+**Extensões:**
+- `1a` — Escola não encontrada → `404 Not Found`
+
+---
+
+### UC14 — Cadastro da Turma
+**Escopo:** Classroom
+**Ator Primário:** Diretor / Administrador
+**Pré-condição:** Escola existente e ativa
+
+**Cenário principal de sucesso:**
+1. O sistema valida se o curso já está cadastrado
+2. O sistema valida a existência e o estado da escola vinculada
+3. O sistema persiste `Classroom` e retorna `201`
+
+**Garantia de sucesso:** Turma cadastrada e associada à escola
+
+**Extensões:**
+- `1a` — Curso já existente → `409 Conflict`
+- `2a` — Escola não encontrada ou inativa → `400 Bad Request`
+
+---
+
+### UC15 — Consulta da Turma por ID
+**Escopo:** Classroom
+**Ator Primário:** Diretor / Administrador
+**Pré-condição:** Turma cadastrada no sistema
+
+**Cenário principal de sucesso:**
+1. O sistema busca `Classroom` por ID
+2. O sistema valida que a turma existe
+3. O sistema retorna `ClassroomOut`
+
+**Garantia de sucesso:** Turma localizada para visualização ou edição
+
+**Extensões:**
+- `1a` — Turma não encontrada → `404 Not Found`
+
+---
+
+### UC16 — Listagem de Turmas por Escola
+**Escopo:** Classroom
+**Ator Primário:** Diretor / Administrador
+**Pré-condição:** Identificador da escola informado
+
+**Cenário principal de sucesso:**
+1. O sistema lista turmas associadas à escola
+2. O sistema retorna a coleção de `ClassroomOut`
+
+**Garantia de sucesso:** Lista de turmas por escola disponível
+
+**Extensões:**
+- `1a` — Nenhuma turma encontrada → lista vazia retornada
+
+---
+
+### UC17 — Atualização da Turma
+**Escopo:** Classroom
+**Ator Primário:** Diretor / Administrador
+**Pré-condição:** Turma existente no sistema
+
+**Cenário principal de sucesso:**
+1. O sistema busca `Classroom` por ID
+2. O sistema aplica alterações válidas no curso
+3. O sistema salva a turma e retorna `ClassroomOut`
+
+**Garantia de sucesso:** Turma atualizada e persistida
+
+**Extensões:**
+- `1a` — Turma não encontrada → `404 Not Found`
+
+---
+
+### UC18 — Desativação da Turma
+**Escopo:** Classroom
+**Ator Primário:** Diretor / Administrador
+**Pré-condição:** Turma existente no sistema
+
+**Cenário principal de sucesso:**
+1. O sistema busca `Classroom` por ID
+2. O sistema marca a turma como inativa
+3. O sistema salva a alteração e retorna `ClassroomOut`
+
+**Garantia de sucesso:** Turma desativada e não participa de novos cadastros
+
+**Extensões:**
+- `1a` — Turma não encontrada → `404 Not Found`
+
+---
+
+### UC19 — Consulta do Estudante por ID
+**Escopo:** Users.Student
+**Ator Primário:** Coordenador / Diretor
+**Pré-condição:** Estudante cadastrado no sistema
+
+**Cenário principal de sucesso:**
+1. O sistema busca o estudante por ID
+2. O sistema valida que o estudante existe
+3. O sistema retorna os dados do estudante com conta associada
+
+**Garantia de sucesso:** Estudante localizado e exibido com informações completas
+
+**Extensões:**
+- `1a` — Estudante não encontrado → `404 Not Found`
+
+---
+
+### UC20 — Atualização do Estudante
+**Escopo:** Users.Student
+**Ator Primário:** Coordenador / Diretor
+**Pré-condição:** Estudante existente no sistema
+
+**Cenário principal de sucesso:**
+1. O sistema busca o estudante por ID
+2. O sistema aplica alterações válidas na turma ou data de nascimento
+3. O sistema salva o estudante e retorna os dados atualizados
+
+**Garantia de sucesso:** Dados do estudante atualizados e persistidos
+
+**Extensões:**
+- `1a` — Estudante não encontrado → `404 Not Found`
+
+---
+
+### UC21 — Desativação do Estudante
+**Escopo:** Users.Student
+**Ator Primário:** Coordenador / Diretor
+**Pré-condição:** Estudante existente com conta vinculada
+
+**Cenário principal de sucesso:**
+1. O sistema busca o estudante por ID
+2. O sistema desativa a conta associada
+3. O sistema salva as alterações e retorna o estudante inativo
+
+**Garantia de sucesso:** Estudante desativado e bloqueado para acesso
+
+**Extensões:**
+- `1a` — Estudante não encontrado → `404 Not Found`
+
+---
+
+### UC22 — Cadastro do Coordenador
+**Escopo:** Users.Coordinator
+**Ator Primário:** Diretor
+**Pré-condição:** E-mail não pode estar cadastrado e escola deve existir
+
+**Cenário principal de sucesso:**
+1. O sistema valida o e-mail e a escola vinculada
+2. O sistema cria a conta de usuário com perfil de coordenador
+3. O sistema persiste o coordenador e retorna o registro completo
+
+**Garantia de sucesso:** Coordenador cadastrado e vinculado à escola
+
+**Extensões:**
+- `1a` — E-mail já cadastrado → `409 Conflict`
+- `1b` — Escola não encontrada ou inativa → `400 Bad Request`
+
+---
+
+### UC23 — Consulta do Coordenador por ID
+**Escopo:** Users.Coordinator
+**Ator Primário:** Diretor / Administrador
+**Pré-condição:** Coordenador cadastrado no sistema
+
+**Cenário principal de sucesso:**
+1. O sistema busca o coordenador por ID
+2. O sistema valida que o coordenador existe
+3. O sistema retorna os dados do coordenador
+
+**Garantia de sucesso:** Coordenador localizado corretamente
+
+**Extensões:**
+- `1a` — Coordenador não encontrado → `404 Not Found`
+
+---
+
+### UC24 — Desativação do Coordenador
+**Escopo:** Users.Coordinator
+**Ator Primário:** Diretor / Administrador
+**Pré-condição:** Coordenador existente com conta de usuário vinculada
+
+**Cenário principal de sucesso:**
+1. O sistema busca o coordenador por ID
+2. O sistema desativa a conta de usuário associada
+3. O sistema salva as alterações e retorna o coordenador inativo
+
+**Garantia de sucesso:** Coordenador desativado e sem acesso ao sistema
+
+**Extensões:**
+- `1a` — Coordenador não encontrado → `404 Not Found`
+
+---
+
+### UC25 — Cadastro do Diretor
+**Escopo:** Users.Director
+**Ator Primário:** Administrador
+**Pré-condição:** E-mail não pode estar cadastrado e escola deve existir
+
+**Cenário principal de sucesso:**
+1. O sistema valida o e-mail e a escola vinculada
+2. O sistema cria a conta de usuário com perfil de diretor
+3. O sistema persiste o diretor e retorna o registro completo
+
+**Garantia de sucesso:** Diretor cadastrado e vinculado à escola
+
+**Extensões:**
+- `1a` — E-mail já cadastrado → `409 Conflict`
+- `1b` — Escola não encontrada ou inativa → `400 Bad Request`
+
+---
+
+### UC26 — Consulta do Diretor por ID
+**Escopo:** Users.Director
+**Ator Primário:** Administrador
+**Pré-condição:** Diretor cadastrado no sistema
+
+**Cenário principal de sucesso:**
+1. O sistema busca o diretor por ID
+2. O sistema valida que o diretor existe
+3. O sistema retorna os dados do diretor
+
+**Garantia de sucesso:** Diretor localizado corretamente
+
+**Extensões:**
+- `1a` — Diretor não encontrado → `404 Not Found`
+
+---
+
+### UC27 — Desativação do Diretor
+**Escopo:** Users.Director
+**Ator Primário:** Administrador
+**Pré-condição:** Diretor existente com conta de usuário vinculada
+
+**Cenário principal de sucesso:**
+1. O sistema busca o diretor por ID
+2. O sistema desativa a conta de usuário associada
+3. O sistema salva as alterações e retorna o diretor inativo
+
+**Garantia de sucesso:** Diretor desativado e sem acesso ao sistema
+
+**Extensões:**
+- `1a` — Diretor não encontrado → `404 Not Found`
 
 ---
 
@@ -299,6 +674,85 @@ Apps presentes: `Accounts`, `Schools`, `Users`, `Classroom`
 - **Relatórios** organizados por aluno, turma e turno
 - **Notificações duplas** — painel web + mensagem automática via WhatsApp
 - **Sem armazenamento de imagens** — apenas dados analíticos são persistidos
+
+---
+
+## 🚀 Instalação do Backend
+
+### Requisitos
+- Python 3.12+
+- [uv](https://docs.astral.sh/uv/) instalado globalmente
+- Docker (opcional, recomendado para ambiente consistente)
+- `docker compose` disponível se optar pelo container
+
+### Instalação do `uv` (caso ainda não tenha)
+
+**Linux / macOS:**
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+**Windows (PowerShell):**
+```powershell
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+```
+
+> O `uv` deve ser instalado **globalmente**, fora de qualquer ambiente virtual. Ele é a ferramenta responsável por criar e gerenciar o `.venv` do projeto.
+
+---
+
+### Instalação local
+
+1. Entre na pasta do backend:
+   ```bash
+   cd backend
+   ```
+2. Crie e ative o ambiente virtual:
+   ```bash
+   uv venv .venv
+   source .venv/bin/activate  # Linux/macOS
+   # ou
+   .venv\Scripts\activate     # Windows
+   ```
+3. Instale as dependências usando o lockfile existente:
+   ```bash
+   uv sync --frozen --no-dev --no-install-project --no-cache
+   ```
+4. Execute as migrações do Django:
+   ```bash
+   python manage.py migrate
+   ```
+5. Inicie o servidor local:
+   ```bash
+   python manage.py runserver 0.0.0.0:8000
+   ```
+
+---
+
+### Instalação com Docker Compose
+
+1. Na raiz do projeto, rode:
+   ```bash
+   docker compose up --build backend
+   ```
+2. Acesse o backend em:
+   ```
+   http://localhost:8000
+   ```
+
+---
+
+### Variáveis de ambiente
+
+O backend carrega variáveis de ambiente via `python-dotenv`. Os valores padrão estão definidos em `backend/config/settings.py`, mas você pode criar um arquivo `.env` na raiz do `backend` com as seguintes chaves:
+
+| Variável | Descrição |
+|---|---|
+| `SECRET_KEY` | Chave secreta do Django |
+| `ALGORITHM` | Algoritmo de assinatura JWT (ex: `HS256`) |
+| `JWT_EXP_MINUTES` | Tempo de expiração do token de acesso (em minutos) |
+| `JWT_EXP_DAYS` | Tempo de expiração do refresh token (em dias) |
+| `DEBUG` | Modo de depuração (`True` em dev, `False` em produção) |
 
 ---
 
@@ -378,11 +832,11 @@ Desenvolvido na **1ª Gerência Regional de Educação (Parnaíba — PI)**, pel
 
 | Nome | Papel |
 |---|---|
-| Antonio Carlos dos Santos da Silva | Desenvolvedor |
-| Arthur França Silva | Desenvolvedor |
-| João Miguel Barros da Silva | Desenvolvedor |
-| Pablo de Jesus dos Santos Dionisio de Oliveira | Desenvolvedor |
-| Rian da Silva Sousa | Desenvolvedor |
+| Antonio Carlos dos Santos da Silva | Desenvolvedor IA |
+| Arthur França Silva | Desenvolvedor Back + IA |
+| João Miguel Barros da Silva | Desenvolvedor Front |
+| Pablo de Jesus dos Santos Dionisio de Oliveira | Desenvolvedor Front |
+| Rian da Silva Sousa | Desenvolvedor Front |
 | Marcos José Souza do Nascimento | Orientador |
 
 ---
