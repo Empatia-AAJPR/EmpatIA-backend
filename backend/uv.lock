@@ -165,6 +165,7 @@ dependencies = [
     { name = "psycopg2-binary" },
     { name = "pydantic", extra = ["email"] },
     { name = "pyjwt" },
+    { name = "python-dotenv" },
     { name = "validate-docbr" },
 ]
 
@@ -182,6 +183,7 @@ requires-dist = [
     { name = "psycopg2-binary", specifier = ">=2.9.12" },
     { name = "pydantic", extras = ["email"], specifier = ">=2.13.4" },
     { name = "pyjwt", specifier = ">=2.12.1" },
+    { name = "python-dotenv", specifier = ">=1.2.2" },
     { name = "validate-docbr", specifier = ">=2.0.0" },
 ]
 
