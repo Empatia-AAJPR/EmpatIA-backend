@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <!-- [Head] start -->
 
 <head>
@@ -50,7 +50,7 @@
     <div class="m-header">
       <a href="../dashboard/index.html" class="b-brand text-primary">
         <!-- ========   Change your logo from here   ============ -->
-        <img src="../assets/images/logo-dark.svg" alt="logo image" class="logo-lg" />
+        <img src="../assets/images/empatIA.svg" alt="logo image" class="logo-lg" />
         <span class="badge bg-brand-color-2 rounded-pill ms-2 theme-version">v1.0</span>
       </a>
     </div>
@@ -83,7 +83,7 @@
         <li class="pc-item pc-hasmenu">
           <a href="#!" class="pc-link">
             <span class="pc-micon">
-              <i class="ph-duotone ph-newspaper"></i>
+              <i class="ph-duotone ph-graduation-cap"></i>
             </span>
             <span class="pc-mtext">Escolas</span><span class="pc-arrow"><i data-feather="chevron-right"></i></span
           ></a>
@@ -95,7 +95,7 @@
         </li>
         <li class="pc-item pc-hasmenu">
           <a href="#!" class="pc-link"
-            ><span class="pc-micon"><i class="ph-duotone ph-newspaper"></i></span><span class="pc-mtext">Sala de aula</span
+            ><span class="pc-micon"><i class="ph-duotone ph-chalkboard-teacher"></i></span><span class="pc-mtext">Sala de aula</span
             ><span class="pc-arrow"><i data-feather="chevron-right"></i></span
           ></a>
           <ul class="pc-submenu">
@@ -110,7 +110,7 @@
         <li class="pc-item pc-hasmenu">
           <a href="#!" class="pc-link">
             <span class="pc-micon">
-              <i class="ph-duotone ph-books"></i>
+              <i class="ph-duotone ph-user"></i>
             </span>
             <span class="pc-mtext">Usuários</span>
             <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
@@ -720,21 +720,21 @@
                 <div class="col-md-6">
                   <div class="mb-3">
                     <label class="form-label">Nome</label>
-                    <input type="text" class="form-control" placeholder="Enter first name">
+                    <input type="text" class="form-control" id="namecoordinator" placeholder="Enter name">
                   </div>
                 </div>
                 
                 <div class="col-md-6">
                   <div class="mb-3">
                     <label class="form-label">Email</label>
-                    <input type="email" class="form-control" placeholder="Enter email">
+                    <input type="email" class="form-control" id="emailcoordinator" placeholder="Enter email">
                   </div>
                 </div>
                 
                 <div class="col-md-6">
                   <div class="mb-3">
                     <label class="form-label">Senha</label>
-                    <input type="password" class="form-control" placeholder="Enter Password">
+                    <input type="password" class="form-control" id="passwordcoordinator" placeholder="Enter Password">
                   </div>
                 </div>
                 
@@ -745,18 +745,18 @@
                 <div class="col-md-6">
                   <div class="mb-3">
                     <label class="form-label">Data de Nascimento</label>
-                    <input type="date" class="form-control">
+                    <input type="date" class="form-control" id="datecoordinator">
                   </div>
                 </div> 
                 <div class="col-md-6">
                   <div class="mb-3">
                     <label class="form-label">Escola</label>
-                    <input type="text" class="form-control" placeholder="Education">
+                    <input type="text" class="form-control" id="schoolcoordinator" placeholder="Enter School">
                   </div>
                 </div>
                 
                 <div class="col-md-12 text-end">
-                  <button class="btn btn-primary">Enviar</button>
+                  <button class="btn btn-primary" onclick="SubmitCoordinator()">Enviar</button>
                 </div>
                 
               </div>
