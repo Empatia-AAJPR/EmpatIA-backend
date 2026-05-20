@@ -12,6 +12,7 @@ dependencies = [
     "django-ninja>=1.6.2",
     "dotenv>=0.9.9",
     "gunicorn>=26.0.0",
+    "opencv-python-headless>=4.13.0.92",
     "passlib>=1.7.4",
     "pgvector>=0.4.2",
     "pillow>=12.2.0",
@@ -19,5 +20,6 @@ dependencies = [
     "pydantic[email]>=2.13.4",
     "pyjwt>=2.12.1",
     "python-dotenv>=1.2.2",
+    "redis>=7.4.0",
     "validate-docbr>=2.0.0",
 ]

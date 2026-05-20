@@ -12,7 +12,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     name = models.CharField(max_length=225)
     email = models.CharField(max_length=220, unique=True)
-    password = models.CharField(max_length=12)
+    password = models.CharField(max_length=220)
     rule = models.CharField(
         max_length=20, choices=UserRules, default=UserRules.PENDING
     )

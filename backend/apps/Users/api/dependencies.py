@@ -21,12 +21,15 @@ from apps.Users.infrastructure.repository import (
     StudentRepository,
 )
 from apps.Users.infrastructure.services import (
+    CompacterService,
     CoordinatorQueryService,
     DirectorQueryService,
     StudentQueryService,
 )
 from apps.Classroom.infrastructure.repository import ClassroomRepository
 from apps.Schools.infrastructure.repository import SchoolRepository
+from core.redis.client import RedisConnectionHandler
+from core.redis.repository import RedisRepository
 
 
 class UsersContainer(containers.DeclarativeContainer):
@@ -52,6 +55,18 @@ class UsersContainer(containers.DeclarativeContainer):
 
     school_repo = providers.Factory(SchoolRepository)
 
+    compacter_service = providers.Factory(CompacterService)
+
+    redis_conn = providers.Singleton(RedisConnectionHandler)
+
+    redis_repo = providers.Factory(
+        RedisRepository,
+        conn= providers.Factory(
+            lambda handler: handler.connect(),
+            handler= redis_conn
+        )
+    )
+
     register_student_use_case = providers.Factory(
         RegisterStudentUseCase,
         user_repo=user_repo,
@@ -60,6 +75,8 @@ class UsersContainer(containers.DeclarativeContainer):
         query_service=query_student,
         file_adapter=file_adapter,
         class_repo=class_repo,
+        compacter_service=compacter_service,
+        redis_repo=redis_repo
     )
 
     response_student_use_case = providers.Factory(

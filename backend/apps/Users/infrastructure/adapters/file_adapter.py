@@ -14,4 +14,4 @@ class ImageFileAdapter(IImageFileAdapter):
             ContentFile(content=img.content, name=img.name),
         )
 
-        return default_storage.url(file)
+        return default_storage.path(file)

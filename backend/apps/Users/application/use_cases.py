@@ -1,3 +1,4 @@
+import json
 from uuid import UUID
 
 from apps.Accounts.domain.entities import UserEntity
@@ -20,6 +21,7 @@ from apps.Users.domain.repositories import (
     IStudentRepository,
 )
 from apps.Users.domain.servicies import (
+    ICompacterService,
     ICoordinatorQueryService,
     IDirectorQueryService,
     IStudentQueryService,
@@ -35,6 +37,7 @@ from apps.Users.infrastructure.exceptions import (
 from apps.Classroom.domain.repositories import IClassroomRepository
 from apps.Schools.domain.repositories import ISchoolRepository
 from core.exceptions import BaseDomainException
+from core.redis.interfaces import IRedisRepository
 
 
 class RegisterStudentUseCase:
@@ -46,6 +49,8 @@ class RegisterStudentUseCase:
         query_service: IStudentQueryService,
         file_adapter: IImageFileAdapter,
         class_repo: IClassroomRepository,
+        redis_repo: IRedisRepository,
+        compacter_service: ICompacterService
     ) -> None:
         self.user_repo = user_repo
         self.hash_service = hash_service
@@ -53,6 +58,8 @@ class RegisterStudentUseCase:
         self.query_service = query_service
         self.file_adapter = file_adapter
         self.class_repo = class_repo
+        self.redis_repo = redis_repo
+        self.compacter_service = compacter_service
 
     def execute(self, dto: StudentInDTO):
         if self.user_repo.exists_email(dto.email):
@@ -88,6 +95,13 @@ class RegisterStudentUseCase:
         )
 
         self.student_repo.save(student)
+
+        if student.photo:
+            file_encoded = self.compacter_service.encodedb64_image(file_img)
+
+            if file_encoded is not None:
+
+                self.redis_repo.h_insert('register', dto.name, json.dumps(file_encoded))
 
         query_user = self.query_service.get_by_id(student.id)
         if not query_user:
