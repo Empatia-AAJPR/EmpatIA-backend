@@ -9,6 +9,7 @@ dependencies = [
     "blue>=0.9.1",
     "dependency-injector>=4.49.0",
     "django>=6.0.5",
+    "django-cors-headers>=4.9.0",
     "django-ninja>=1.6.2",
     "dotenv>=0.9.9",
     "gunicorn>=26.0.0",
